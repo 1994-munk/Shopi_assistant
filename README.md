@@ -2,36 +2,129 @@
 
 # Shopi
 
-### Colorful AI grocery shopping assistant
+### Production-aligned AI commerce platform for conversational grocery shopping
 
 <a href="#quick-start">
   <img src="docs/shopi-demo.gif" alt="Shopi demo animation" width="780" />
 </a>
 
 <div>
-  <a href="#quick-start">Try it now</a>
-  ·
-  <a href="#features">Features</a>
-  ·
   <a href="#architecture">Architecture</a>
+  ·
+  <a href="#running-the-platform">Running the platform</a>
+  ·
+  <a href="#roadmap">Roadmap</a>
 </div>
 
 </div>
 
-Shopi helps shoppers discover fresh groceries, compare options, and check out without friction. The experience is colorful, conversational, and designed for demos, rapid prototyping, and future AI-powered upgrades.
+Shopi is a production-minded conversational commerce platform that combines AI-driven shopping assistance, product retrieval, basket orchestration, and safety-aware customer interactions in one system. The current implementation is a foundational product-grade prototype designed to evolve into an end-to-end LLM platform with orchestration, state management, structured tool use, evaluation, and deployment controls.
 
-> Shopi is a demo storefront: it keeps a live basket, handles basket updates in conversation, and includes a Stripe-ready checkout flow with a secure demo fallback for local development.
+> Shopi demonstrates how a customer-facing shopping assistant can move from isolated chat UX to a production architecture with guardrails, telemetry, retrieval, memory, and measurable operational quality.
 
 ---
 
-## Quick start
+## Why this project matters
+
+Modern AI commerce experiences require more than a simple chatbot. They need:
+
+- conversational understanding across multi-turn shopping journeys
+- reliable state handling for basket, product context, and user intent
+- retrieval and ranking over a live product catalog
+- policy enforcement and safety checks before actions occur
+- telemetry and evaluation systems to measure quality and regressions
+- a path from prototype to production deployment with traceability and observability
+
+Shopi embodies this pattern: a UI-driven shopping experience anchored by an agentic decision loop, explicit safety checks, and structured persistence for evaluation and iteration.
+
+---
+
+## Production architecture overview
+
+```mermaid
+flowchart LR
+  A[Customer] --> B[Frontend experience]
+  B --> C[API layer]
+  C --> D[Agent orchestration]
+  D --> E[Product retrieval + ranking]
+  D --> F[Session memory]
+  D --> G[Safety policies]
+  D --> H[Basket + checkout tools]
+  D --> I[Telemetry + evaluation]
+  I --> J[Monitoring + feedback loop]
+```
+
+The architecture follows a modular design that separates customer experience from orchestration, retrieval, and operational controls:
+
+- `src/agent/` — intent understanding, basket logic, safety rules, and conversational state transitions
+- `src/components/` — storefront UI, shopping chat, product cards, and checkout flows
+- `src/services/` — turn execution, persistence, and telemetry pipelines
+- `src/lib/` — catalog, money, and persistence helpers
+- `supabase/` — data layer and retrieval integration
+
+This creates the foundation for a larger LLM platform where the same patterns can expand into:
+
+- model orchestration with tool calling
+- vector or semantic retrieval for personalized recommendations
+- conversation memory and long-lived session state
+- automated evaluation and guardrail monitoring
+- production deployment, observability, and experimentation loops
+
+---
+
+## End-to-end platform design
+
+A full production version of Shopi would extend the current prototype into the following stack:
+
+### 1. Customer-facing experience
+- React storefront with chat, product discovery, basket, and checkout flows
+- responsive shopping UX optimized for mobile and web
+- session-based continuity and contextual re-entry
+
+### 2. API and orchestration layer
+- REST or GraphQL API for chat turns, cart actions, and product queries
+- orchestration framework such as LangGraph or PydanticAI for structured reasoning and tool calls
+- explicit task routing for search, add/remove, basket review, and secure checkout
+
+### 3. Retrieval and ranking
+- product retrieval over structured catalog metadata
+- semantic search for intent expansion and recommendations
+- ranking logic for relevance, price sensitivity, dietary preferences, and personalization
+
+### 4. Memory and context management
+- session state stored in durable storage
+- conversation memory with user preferences and basket history
+- context compression and summarization for long-running shopping sessions
+
+### 5. Safety and guardrails
+- prompt-injection detection
+- PII and sensitive data filtering
+- policy enforcement for off-topic and unsafe instructions
+- explicit fallback paths when the system cannot complete a request safely
+
+### 6. Evaluation and monitoring
+- golden dataset for shopping intents and edge cases
+- automated evaluations for tool correctness and user satisfaction
+- telemetry for latency, error rates, safety flags, and user conversions
+- dashboards and feedback loops to improve product quality after launch
+
+### 7. Production operations
+- model serving with hosted or self-hosted inference
+- infrastructure automation, staging environments, and deploy policies
+- logging, tracing, and rollback procedures for live customer traffic
+
+See [docs/architecture.md](docs/architecture.md) for the full platform blueprint.
+
+---
+
+## Running the platform
 
 ```bash
 npm install
 npm run dev
 ```
 
-Then open the app in your browser and try one of these prompts:
+Then open the app in your browser and try prompts such as:
 
 - "Show vegan snacks under $5"
 - "Add two avocados"
@@ -40,64 +133,29 @@ Then open the app in your browser and try one of these prompts:
 
 ---
 
-## Features
-
-- Conversational shopping: search by keyword, category, dietary tag, or price.
-- Smart basket management: add, remove, clear, and review totals in a single flow.
-- Stripe-ready checkout: the basket can redirect to a hosted Stripe checkout session when a backend endpoint is configured, while the local demo still works without a live provider.
-- Safety guardrails: personal data and prompt-injection attempts are blocked before the agent acts.
-- Observability: latency, safety flags, and intents are logged for evaluation.
-
----
-
-## Architecture
-
-```mermaid
-flowchart LR
-  A[Customer message] --> B[Safety checks]
-  B --> C[Intent understanding]
-  C --> D[Catalog search + ranking]
-  D --> E[Basket update]
-  E --> F[Checkout flow]
-  F --> G[Telemetry + evaluation]
-```
-
-The project has a clear split between the pure agent core and browser-facing app code:
-
-- `src/agent/` - turn handling, basket logic, safety rules, and dialogue flows
-- `src/components/` - chat, product cards, and payment/checkout UI
-- `src/services/` - Supabase integration and session wiring
-- `src/lib/` - money formatting and persistence helpers
-
----
-
-## Product catalog
-
-The default catalog is seeded in Supabase and includes a wider mix of produce, dairy, pantry staples, drinks, frozen foods, and snacks. This keeps the demo colorful and realistic for more product discovery scenarios.
-
----
-
-## Running tests
+## Quality and validation
 
 ```bash
 npm test
 npm run build
 ```
 
+This helps validate the conversational logic, guardrails, and frontend build health as the platform evolves from prototype toward production readiness.
+
 ---
 
 ## Roadmap
 
-- [ ] Add sign-in and per-user baskets
-- [x] Connect a Stripe-ready checkout flow with a live backend hook for production usage
-- [x] Expand the catalog with seasonal offers and bundles
-- [ ] Add review, ratings, and personalization signals
-- [ ] Create a production-grade deployment flow
+- [ ] Add authenticated user sessions and persistent per-user carts
+- [x] Connect a Stripe-ready checkout flow with a secure demo fallback
+- [x] Expand the catalog with realistic grocery categories and dietary metadata
+- [ ] Add semantic retrieval, recommendation ranking, and personalization signals
+- [ ] Add a backend orchestration layer for production-grade LLM workflows
+- [ ] Integrate evaluation pipelines, monitoring, and guardrail automation
+- [ ] Deploy a staging and production environment with traceable observability
 
 ---
 
 ## Project notes
 
-- The app is designed for demos and experimentation, but it includes a Stripe-ready payment path for real checkout deployments.
-- The checkout flow falls back to a local demo payment when no production endpoint is configured so the app remains usable during development.
-- The project metadata is published as a GitHub project so the storefront can be shared and iterated in public.
+Shopi is intentionally designed as a high-signal product prototype: it demonstrates the user experience, agent logic, safety patterns, and evaluation mindset needed to move from demo to production-quality AI commerce systems. It is a strong foundation for teams building customer-facing LLM products where product design, safety, retrieval, and operational quality matter as much as model performance itself.
