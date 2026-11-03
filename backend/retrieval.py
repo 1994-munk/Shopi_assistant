@@ -13,7 +13,9 @@ Why this matters:
 from __future__ import annotations
 
 import re
-from typing import Any, Dict, List, Sequence
+from typing import Any, Dict, List, Optional, Sequence
+
+from personalization import score_for_user
 
 
 class CatalogRetriever:
@@ -59,7 +61,6 @@ class CatalogRetriever:
                 score += 2.0
 
         # Price fit matters for shopping intent; cheaper queries should rank toward lower cost.
-        # This keeps the ranking logic explainable and easy to tune later.
         if "cheap" in tokens or "budget" in tokens:
             if product.get("price_cents", 0) < 500:
                 score += 2.0
@@ -70,14 +71,22 @@ class CatalogRetriever:
 
         return score
 
-    def search(self, query: str, limit: int = 6) -> List[Dict[str, Any]]:
-        """Return the top matches for a shopping query."""
+    def search(
+        self,
+        query: str,
+        limit: int = 6,
+        user_profile: Optional[Dict[str, Any]] = None,
+        cart: Optional[List[Dict[str, Any]]] = None,
+    ) -> List[Dict[str, Any]]:
+        """Return the top matches for a shopping query with optional personalization."""
 
         ranked = []
         for product in self.catalog:
-            score = self._score_product(query, product)
-            if score > 0:
-                ranked.append((score, product))
+            base_score = self._score_product(query, product)
+            personalization_bonus = score_for_user(product, query, user_profile=user_profile, cart=cart)
+            total_score = base_score + personalization_bonus
+            if total_score > 0:
+                ranked.append((total_score, product))
 
         ranked.sort(key=lambda item: item[0], reverse=True)
         return [product for _, product in ranked[:limit]]

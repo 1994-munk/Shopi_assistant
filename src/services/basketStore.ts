@@ -1,5 +1,6 @@
-import { supabase } from '../lib/supabase';
 import type { BasketLine } from '../agent/types';
+import { getCurrentUserId, loadUserCart, saveUserCart } from '../lib/auth';
+import { supabase } from '../lib/supabase';
 
 interface BasketRow {
   product_id: string;
@@ -7,8 +8,10 @@ interface BasketRow {
 }
 
 export async function loadBasket(sessionId: string): Promise<BasketLine[]> {
+  const userId = getCurrentUserId();
+
   if (!supabase) {
-    return [];
+    return loadUserCart(userId).map((row) => ({ productId: row.productId, quantity: row.quantity }));
   }
 
   const { data, error } = await supabase
@@ -22,7 +25,10 @@ export async function loadBasket(sessionId: string): Promise<BasketLine[]> {
 
 // Writes only what changed between two basket states, so an unchanged basket costs no requests.
 export async function saveBasket(sessionId: string, previous: BasketLine[], next: BasketLine[]): Promise<void> {
+  const userId = getCurrentUserId();
+
   if (!supabase) {
+    saveUserCart(userId, next.map((line) => ({ productId: line.productId, quantity: line.quantity })));
     return;
   }
 
@@ -55,4 +61,6 @@ export async function saveBasket(sessionId: string, previous: BasketLine[], next
     );
     if (error) throw new Error('Could not save your basket. Please try again.');
   }
+
+  saveUserCart(userId, next.map((line) => ({ productId: line.productId, quantity: line.quantity })));
 }

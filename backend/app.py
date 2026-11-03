@@ -20,6 +20,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
+from auth import UserStore
 from evaluator import EvaluationRunner
 from langgraph_ready import build_langgraph_graph
 from monitoring import TelemetryLogger
@@ -144,6 +145,14 @@ class ChatResponse(BaseModel):
     safety_flags: List[str] = Field(default_factory=list)
 
 
+class AuthSessionRequest(BaseModel):
+    """Request model used for user identity and preferences."""
+
+    user_id: str = Field(..., min_length=1)
+    email: str | None = None
+    preferences: Dict[str, Any] = Field(default_factory=dict)
+
+
 # ---------------------------------------------------------------------------
 # Runtime services
 # ---------------------------------------------------------------------------
@@ -152,6 +161,7 @@ class ChatResponse(BaseModel):
 
 telemetry = TelemetryLogger()
 session_store = SessionStore(db_path="shopi.db")
+user_store = UserStore(storage_path="shopi_users.json")
 db_status = session_store.migrate_schema()
 retriever = CatalogRetriever(CATALOG)
 vector_store = VectorStoreAdapter(CATALOG)
@@ -206,6 +216,57 @@ def dashboard() -> Dict[str, Any]:
         "graph": build_langgraph_graph(),
         "recent_sessions": recent_sessions,
     }
+
+
+@app.get("/analytics")
+def analytics() -> Dict[str, Any]:
+    """Expose a richer dashboard payload for product analytics and monitoring."""
+
+    try:
+        recent_sessions = session_store.list_recent_sessions(limit=20)
+    except Exception:
+        recent_sessions = []
+
+    summary = telemetry.summarize()
+    return {
+        "service": "shopi-backend",
+        "status": "ok",
+        "metrics": summary,
+        "vector": vector_store.status(),
+        "recent_sessions": recent_sessions,
+        "top_intents": summary.get("intents", {}),
+        "database": db_status,
+    }
+
+
+@app.post("/auth/session")
+def create_user_session(request: AuthSessionRequest) -> Dict[str, Any]:
+    """Create or refresh a user profile and persist any personalization preferences."""
+
+    user = user_store.ensure_user(request.user_id, request.email)
+    if request.preferences:
+        user = user_store.upsert_preferences(request.user_id, request.preferences)
+    return {
+        "user_id": user["user_id"],
+        "email": user.get("email"),
+        "preferences": user.get("preferences", {}),
+        "cart": user.get("cart", []),
+    }
+
+
+@app.get("/users/{user_id}/cart")
+def get_user_cart(user_id: str) -> Dict[str, Any]:
+    """Return the current cart for a specific user."""
+
+    return {"user_id": user_id, "cart": user_store.get_cart(user_id)}
+
+
+@app.post("/users/{user_id}/cart")
+def save_user_cart(user_id: str, basket: List[BasketItem]) -> Dict[str, Any]:
+    """Persist the cart for a specific user so it can be restored later."""
+
+    saved = user_store.set_cart(user_id, [item.model_dump() for item in basket])
+    return {"user_id": user_id, "cart": saved}
 
 
 @app.get("/products")
