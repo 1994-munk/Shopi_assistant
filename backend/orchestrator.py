@@ -16,9 +16,11 @@ readable enough for humans to understand without a huge amount of abstraction.
 
 from __future__ import annotations
 
+import os
 import time
 from typing import Any, Dict, List, Optional
 
+from langgraph_ready import build_langgraph_graph
 from llm_agent import LLMShoppingAgent
 from monitoring import TelemetryLogger
 from retrieval import CatalogRetriever
@@ -44,6 +46,8 @@ class ShoppingOrchestrator:
         self.telemetry = telemetry or TelemetryLogger()
         self.llm_agent = llm_agent or LLMShoppingAgent()
         self.vector_store = vector_store or VectorStoreAdapter(catalog)
+        self.langgraph_enabled = os.getenv("USE_LANGGRAPH", "false").lower() == "true"
+        self.langgraph = build_langgraph_graph() if self.langgraph_enabled else None
 
     def build_langgraph_state(
         self,
@@ -158,6 +162,45 @@ class ShoppingOrchestrator:
 
         # Build a graph-like state object so the system is ready for LangGraph adoption.
         graph_state = self.build_langgraph_state(session_id, user_message, basket, context)
+
+        # Optional LangGraph path: if enabled, we run the graph state through a real workflow.
+        if self.langgraph_enabled and self.langgraph is not None:
+            graph_state = self.build_langgraph_state(session_id, user_message, basket, context)
+            graph_result = self.langgraph.invoke(graph_state)
+            response_text = graph_result.get("response_text") or "I can help you search for products, review your basket, or check out."
+            next_basket = list(graph_result.get("basket", basket))
+            response = {
+                "session_id": session_id,
+                "intent": graph_result.get("intent", self.detect_intent(user_message)),
+                "response_text": response_text,
+                "basket": next_basket,
+                "matches": graph_result.get("matches", []),
+                "safety_flags": graph_result.get("safety_flags", []),
+                "graph_state": graph_result,
+            }
+
+            self.session_store.save_session(session_id, next_basket, {"context": context or {}, "last_intent": response["intent"], "last_message": user_message})
+            self.session_store.append_message(session_id, "user", user_message)
+            self.session_store.append_message(session_id, "assistant", response_text)
+
+            latency_ms = int((time.perf_counter() - started_at) * 1000)
+            self.telemetry.record_turn(
+                session_id=session_id,
+                user_message=user_message,
+                intent=response["intent"],
+                response_text=response_text,
+                safety_flags=response["safety_flags"],
+                latency_ms=latency_ms,
+            )
+            self.session_store.append_turn(
+                session_id=session_id,
+                user_message=user_message,
+                intent=response["intent"],
+                response_text=response_text,
+                safety_flags=response["safety_flags"],
+                latency_ms=latency_ms,
+            )
+            return response
 
         # Step 1: validate safety before the assistant takes any action.
         safety_flags = self.run_safety_checks(user_message)
