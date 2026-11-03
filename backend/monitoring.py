@@ -10,7 +10,8 @@ obvious to a human reviewer.
 
 from __future__ import annotations
 
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
+from statistics import mean
 from typing import Any, Dict, List
 
 
@@ -41,3 +42,30 @@ class TelemetryLogger:
         """Return sanitized recent events for dashboards or debugging."""
 
         return [asdict(event) for event in self.events[-limit:]]
+
+    def summarize(self) -> Dict[str, Any]:
+        """Return a compact summary of system health for a dashboard or API response."""
+
+        if not self.events:
+            return {
+                "total_events": 0,
+                "avg_latency_ms": 0,
+                "intents": {},
+                "blocked_turns": 0,
+            }
+
+        latencies = [event.latency_ms for event in self.events]
+        intent_counts: Dict[str, int] = {}
+        blocked_turns = 0
+
+        for event in self.events:
+            intent_counts[event.intent] = intent_counts.get(event.intent, 0) + 1
+            if event.intent == "blocked":
+                blocked_turns += 1
+
+        return {
+            "total_events": len(self.events),
+            "avg_latency_ms": round(mean(latencies), 2),
+            "intents": intent_counts,
+            "blocked_turns": blocked_turns,
+        }

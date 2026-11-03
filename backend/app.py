@@ -21,9 +21,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
 from evaluator import EvaluationRunner
+from langgraph_ready import build_langgraph_graph
+from monitoring import TelemetryLogger
 from orchestrator import ShoppingOrchestrator
 from retrieval import CatalogRetriever
 from storage import SessionStore
+from vector_store import VectorStoreAdapter
 
 # ---------------------------------------------------------------------------
 # Application metadata
@@ -145,14 +148,18 @@ class ChatResponse(BaseModel):
 # Runtime services
 # ---------------------------------------------------------------------------
 # These services are simple enough to understand, but they mirror the architecture of
-# a real platform: retrieval, durable stores, and orchestration are separated.
+# a real platform: retrieval, durable stores, telemetry, and orchestration are separated.
 
+telemetry = TelemetryLogger()
 session_store = SessionStore(db_path="shopi.db")
 retriever = CatalogRetriever(CATALOG)
+vector_store = VectorStoreAdapter(CATALOG)
 orchestrator = ShoppingOrchestrator(
     catalog=CATALOG,
     retriever=retriever,
     session_store=session_store,
+    telemetry=telemetry,
+    vector_store=vector_store,
 )
 evaluator = EvaluationRunner(orchestrator)
 
@@ -166,7 +173,31 @@ evaluator = EvaluationRunner(orchestrator)
 def health() -> Dict[str, str]:
     """A lightweight readiness check for deployment and infrastructure monitoring."""
 
-    return {"status": "ok", "service": "shopi-backend"}
+    return {"status": "ok", "service": "shopi-backend", "vector_backend": vector_store.status()["backend"]}
+
+
+@app.get("/metrics")
+def metrics() -> Dict[str, Any]:
+    """Expose a compact observability summary for product dashboards and reviews."""
+
+    return {
+        "status": "ok",
+        "vector": vector_store.status(),
+        "telemetry": telemetry.summarize(),
+        "graph": build_langgraph_graph(),
+    }
+
+
+@app.get("/dashboard")
+def dashboard() -> Dict[str, Any]:
+    """Return a minimal dashboard payload for a monitoring or internal admin view."""
+
+    return {
+        "service": "shopi-backend",
+        "vector": vector_store.status(),
+        "metrics": telemetry.summarize(),
+        "graph": build_langgraph_graph(),
+    }
 
 
 @app.get("/products")

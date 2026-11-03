@@ -19,9 +19,11 @@ from __future__ import annotations
 import time
 from typing import Any, Dict, List, Optional
 
+from llm_agent import LLMShoppingAgent
 from monitoring import TelemetryLogger
 from retrieval import CatalogRetriever
 from storage import SessionStore
+from vector_store import VectorStoreAdapter
 
 
 class ShoppingOrchestrator:
@@ -33,11 +35,58 @@ class ShoppingOrchestrator:
         retriever: Optional[CatalogRetriever] = None,
         session_store: Optional[SessionStore] = None,
         telemetry: Optional[TelemetryLogger] = None,
+        llm_agent: Optional[LLMShoppingAgent] = None,
+        vector_store: Optional[VectorStoreAdapter] = None,
     ) -> None:
         self.catalog = catalog
         self.retriever = retriever or CatalogRetriever(catalog)
         self.session_store = session_store or SessionStore()
         self.telemetry = telemetry or TelemetryLogger()
+        self.llm_agent = llm_agent or LLMShoppingAgent()
+        self.vector_store = vector_store or VectorStoreAdapter(catalog)
+
+    def build_langgraph_state(
+        self,
+        session_id: str,
+        user_message: str,
+        basket: List[Dict[str, Any]],
+        context: Optional[Dict[str, Any]] = None,
+    ) -> Dict[str, Any]:
+        """Create the shape of a graph state object that can later be passed to LangGraph."""
+
+        return {
+            "session_id": session_id,
+            "user_message": user_message,
+            "basket": list(basket),
+            "context": context or {},
+            "intent": "",
+            "safety_flags": [],
+            "matches": [],
+            "response_text": "",
+        }
+
+    def build_graph_definition(self) -> Dict[str, Any]:
+        """Return a lightweight graph blueprint; this is the preparation needed for LangGraph."""
+
+        return {
+            "graph_name": "shopi_assistant",
+            "entry_point": "safety_gate",
+            "nodes": [
+                {"id": "safety_gate", "type": "guardrail"},
+                {"id": "intent_router", "type": "classifier"},
+                {"id": "retrieval", "type": "vector_retriever"},
+                {"id": "basket_update", "type": "tool"},
+                {"id": "llm_response", "type": "model"},
+                {"id": "persist_state", "type": "memory"},
+            ],
+            "edges": [
+                ["safety_gate", "intent_router"],
+                ["intent_router", "retrieval"],
+                ["retrieval", "basket_update"],
+                ["basket_update", "llm_response"],
+                ["llm_response", "persist_state"],
+            ],
+        }
 
     def run_safety_checks(self, message: str) -> List[str]:
         """Apply the same guardrail logic used by the product-facing demo."""
@@ -107,8 +156,13 @@ class ShoppingOrchestrator:
 
         started_at = time.perf_counter()
 
+        # Build a graph-like state object so the system is ready for LangGraph adoption.
+        graph_state = self.build_langgraph_state(session_id, user_message, basket, context)
+
         # Step 1: validate safety before the assistant takes any action.
         safety_flags = self.run_safety_checks(user_message)
+        graph_state["safety_flags"] = safety_flags
+
         if safety_flags:
             self.session_store.append_message(session_id, "user", user_message)
             self.session_store.append_message(session_id, "assistant", "I can only help with grocery shopping requests.")
@@ -132,7 +186,13 @@ class ShoppingOrchestrator:
 
         # Step 2: resolve the intent and retrieve the best product matches.
         intent = self.detect_intent(user_message)
-        matches = self.retriever.search(user_message, limit=6)
+        graph_state["intent"] = intent
+
+        # Prefer the vector-backed adapter if it is configured, while keeping a stable interface.
+        matches = self.vector_store.search(user_message, limit=6)
+        if not matches:
+            matches = self.retriever.search(user_message, limit=6)
+        graph_state["matches"] = matches
 
         # Step 3: apply tool-like actions to the basket state.
         next_basket = list(basket)
@@ -149,11 +209,17 @@ class ShoppingOrchestrator:
                 "last_message": user_message,
             },
         )
-        self.session_store.append_message(session_id, "user", user_message)
-        self.session_store.append_message(session_id, "assistant", self._response_for_intent(intent, matches, next_basket))
 
-        # Step 5: emit turn-level telemetry for monitoring and evaluation.
-        response_text = self._response_for_intent(intent, matches, next_basket)
+        # Step 5: optionally use an LLM to generate the final customer-facing response.
+        response_text = self.llm_agent.generate_response(user_message, matches, next_basket)
+        if intent == "blocked":
+            response_text = "I can only help with grocery shopping. Please ask for a product, basket update, or checkout flow."
+        graph_state["response_text"] = response_text
+
+        self.session_store.append_message(session_id, "user", user_message)
+        self.session_store.append_message(session_id, "assistant", response_text)
+
+        # Step 6: emit turn-level telemetry for monitoring and evaluation.
         latency_ms = int((time.perf_counter() - started_at) * 1000)
         self.telemetry.record_turn(
             session_id=session_id,
@@ -179,4 +245,5 @@ class ShoppingOrchestrator:
             "basket": next_basket,
             "matches": matches,
             "safety_flags": safety_flags,
+            "graph_state": graph_state,
         }
