@@ -10,6 +10,30 @@ This project is designed to be deployed as a small AI commerce platform with a f
 - Vector store: Qdrant for retrieval and semantic matching
 - Monitoring: telemetry summary endpoints and logs
 
+## Azure deployment path
+
+This repository includes a production-ready GitHub Actions workflow for Azure Container Apps. It validates frontend and backend changes, then builds and deploys the backend container using Azure-managed infrastructure.
+
+The workflow expects the following GitHub repository variables to be set:
+
+- `AZURE_CONTAINER_APP_NAME`
+- `AZURE_RESOURCE_GROUP`
+- `AZURE_CONTAINER_APP_ENV`
+- `AZURE_LOCATION`
+- `ACR_NAME`
+
+The workflow also expects the following secrets:
+
+- `AZURE_CREDENTIALS`
+- `DATABASE_URL`
+- `QDRANT_URL`
+- `OPENAI_API_KEY`
+- `OPENAI_API_BASE`
+- `LLM_PROVIDER`
+- `USE_LANGGRAPH`
+
+This is a strong production starting point for a managed deployment without forcing the app to depend on any single hosting vendor.
+
 ## Required environment variables
 
 Set these values in the deployment environment before bringing up the app:

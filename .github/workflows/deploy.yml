@@ -5,6 +5,14 @@ on:
     branches: [main]
   workflow_dispatch:
 
+env:
+  AZURE_CONTAINER_APP_NAME: ${{ vars.AZURE_CONTAINER_APP_NAME }}
+  AZURE_RESOURCE_GROUP: ${{ vars.AZURE_RESOURCE_GROUP }}
+  AZURE_CONTAINER_APP_ENV: ${{ vars.AZURE_CONTAINER_APP_ENV }}
+  AZURE_LOCATION: ${{ vars.AZURE_LOCATION || 'eastus' }}
+  ACR_NAME: ${{ vars.ACR_NAME }}
+  APP_PORT: 8000
+
 jobs:
   validate:
     name: Validate backend and frontend
@@ -42,17 +50,57 @@ jobs:
         run: python -m compileall backend
 
   deploy:
-    name: Deploy to production environment
+    name: Deploy backend to Azure Container Apps
     needs: validate
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
     permissions:
       contents: read
+      id-token: write
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
 
-      - name: Deploy placeholder
+      - name: Log in to Azure
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Build and push backend image
         run: |
-          echo "Production deployment step is intentionally kept simple and readable."
-          echo "Replace this with your actual deployment target such as Railway, Render, Azure App Service, or a container registry workflow."
+          az acr build \
+            --registry "${{ vars.ACR_NAME }}" \
+            --image "shopi-backend:${{ github.sha }}" \
+            --file backend/Dockerfile \
+            .
+
+      - name: Create or update Azure Container App
+        run: |
+          az containerapp up \
+            --name "${{ vars.AZURE_CONTAINER_APP_NAME }}" \
+            --resource-group "${{ vars.AZURE_RESOURCE_GROUP }}" \
+            --environment "${{ vars.AZURE_CONTAINER_APP_ENV }}" \
+            --location "${{ vars.AZURE_LOCATION || 'eastus' }}" \
+            --image "${{ vars.ACR_NAME }}.azurecr.io/shopi-backend:${{ github.sha }}" \
+            --target-port 8000 \
+            --ingress external \
+            --registry-server "${{ vars.ACR_NAME }}.azurecr.io" \
+            --env-vars \
+              APP_ENV=production \
+              APP_PORT=8000 \
+              OPENAI_MODEL=gpt-4o-mini \
+              VECTOR_BACKEND=qdrant \
+              DATABASE_URL="${{ secrets.DATABASE_URL }}" \
+              QDRANT_URL="${{ secrets.QDRANT_URL }}" \
+              OPENAI_API_KEY="${{ secrets.OPENAI_API_KEY }}" \
+              OPENAI_API_BASE="${{ secrets.OPENAI_API_BASE }}" \
+              LLM_PROVIDER="${{ secrets.LLM_PROVIDER || 'openai' }}" \
+              USE_LANGGRAPH="${{ secrets.USE_LANGGRAPH || 'false' }}"
+
+      - name: Confirm deployment URL
+        run: |
+          az containerapp show \
+            --name "${{ vars.AZURE_CONTAINER_APP_NAME }}" \
+            --resource-group "${{ vars.AZURE_RESOURCE_GROUP }}" \
+            --query properties.configuration.ingress.fqdn \
+            -o tsv
