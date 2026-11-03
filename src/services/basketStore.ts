@@ -7,6 +7,10 @@ interface BasketRow {
 }
 
 export async function loadBasket(sessionId: string): Promise<BasketLine[]> {
+  if (!supabase) {
+    return [];
+  }
+
   const { data, error } = await supabase
     .from('basket_items')
     .select('product_id, quantity')
@@ -18,6 +22,10 @@ export async function loadBasket(sessionId: string): Promise<BasketLine[]> {
 
 // Writes only what changed between two basket states, so an unchanged basket costs no requests.
 export async function saveBasket(sessionId: string, previous: BasketLine[], next: BasketLine[]): Promise<void> {
+  if (!supabase) {
+    return;
+  }
+
   const removedIds = previous
     .filter((line) => !next.some((candidate) => candidate.productId === line.productId))
     .map((line) => line.productId);

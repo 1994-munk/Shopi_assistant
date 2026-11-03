@@ -10,6 +10,10 @@ interface TurnEventInput {
 }
 
 export async function recordTurn(event: TurnEventInput): Promise<void> {
+  if (!supabase) {
+    return;
+  }
+
   const { error } = await supabase.from('turn_events').insert({
     session_id: event.sessionId,
     turn_index: event.turnIndex,

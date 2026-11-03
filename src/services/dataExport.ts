@@ -43,6 +43,10 @@ export const EXPORT_TABLES: ExportTableConfig[] = [
 const PAGE_SIZE = 1000;
 
 async function fetchAllRows(config: ExportTableConfig): Promise<Record<string, CsvValue>[]> {
+  if (!supabase) {
+    return [];
+  }
+
   const rows: Record<string, CsvValue>[] = [];
   for (let from = 0; ; from += PAGE_SIZE) {
     const { data, error } = await supabase
@@ -59,6 +63,10 @@ async function fetchAllRows(config: ExportTableConfig): Promise<Record<string, C
 }
 
 export async function downloadTableAsCsv(config: ExportTableConfig): Promise<void> {
+  if (!supabase) {
+    return;
+  }
+
   const rows = await fetchAllRows(config);
   const csv = toCsv(config.columns, rows);
   const blob = new Blob(['\uFEFF', csv], { type: 'text/csv;charset=utf-8' });
