@@ -1,131 +1,269 @@
 <div align="center">
 
+<img src="docs/shopi-demo.gif" alt="Shopi animated product demo" width="1100" />
+
 # Shopi
 
-### AI-powered grocery shopping, designed like a production conversational commerce system
+### AI-powered grocery shopping with a real product and platform story
 
-<img src="docs/shopi-hero.svg" alt="Shopi product showcase" width="980" />
+<p>
+  <strong>Conversational commerce, retrieval-driven product discovery, durable session state, and a roadmap toward production-grade AI shopping.</strong>
+</p>
 
 <div>
-  <a href="#why-shopi">Why Shopi</a>
+  <a href="#platform-story">Platform story</a>
   ·
-  <a href="#what-is-in-the-project-right-now">What’s in the project</a>
+  <a href="#what-is-in-the-project">What’s in the project</a>
   ·
-  <a href="#run-it-locally">Run it locally</a>
+  <a href="#run-it-locally">Run locally</a>
   ·
   <a href="#deployment">Deployment</a>
   ·
   <a href="#roadmap">Roadmap</a>
 </div>
 
+<br />
+
+<img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-5.x-3178C6?logo=typescript&logoColor=white" />
+<img alt="React" src="https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=white" />
+<img alt="Vite" src="https://img.shields.io/badge/Vite-5-646CFF?logo=vite&logoColor=white" />
+<img alt="Python" src="https://img.shields.io/badge/Python-3.11-3776AB?logo=python&logoColor=white" />
+<img alt="FastAPI" src="https://img.shields.io/badge/FastAPI-Ready-009688?logo=fastapi&logoColor=white" />
+<img alt="Production" src="https://img.shields.io/badge/Pattern-Platform-ready-FF7E5F" />
+
 </div>
 
-Shopi is a full-stack conversational shopping app that blends a grocery storefront, AI decision-making, basket state management, safety-aware UX, and production-minded deployment patterns. It is not just a demo assistant — it is a platform-ready architecture for customer-facing commerce AI, built to look and feel like a real product while staying readable for human review.
+Shopi is a conversational commerce platform for grocery shopping, designed to feel like a premium app while showcasing the engineering behind a production AI system. It combines a customer-friendly storefront, stateful shopping conversations, retrieval and ranking concepts, and deployment patterns that make sense for real-world product teams.
 
-> The experience is intentionally designed to be easy to understand, ship, and extend. That makes it a strong example of how a concept prototype can evolve into a practical LLM-driven product system.
-
----
-
-## Why Shopi
-
-Modern grocery shopping is no longer just about listing products. A thoughtful shopping assistant has to:
-
-- understand the user’s intent across multiple turns
-- manage basket state without losing context
-- filter by dietary or budget preferences
-- surface products with structured relevance
-- protect the flow with safety checks and guardrails
-- support a real checkout flow without exposing secrets
-- behave well in both local demo and production deployment environments
-
-Shopi brings all of that together in a product-like experience. It is built to illustrate how a conversational shopping assistant can evolve from “chatbot demo” into an operational AI commerce product.
+> This project is not just a toy chatbot. It is a readable, portfolio-friendly foundation for a serious AI shopping product with a clear migration path toward real model orchestration, vector retrieval, durable storage, monitoring, and customer-grade safety.
 
 ---
 
-## What makes it feel production-ready
+## Platform story
+
+Shopi is designed around the real problems a customer-facing AI shopping system has to solve:
+
+- understanding intent across multi-turn shopping conversations
+- keeping basket state stable even as the user asks for modifications
+- ranking products by preference, nutrition, and purchase fit
+- handling contextual follow-up without losing memory
+- making the experience safe, measurable, and easy to extend
+- staying deployable in a modern frontend + backend architecture
+
+This is the kind of story a strong AI product engineering portfolio should tell: product thinking first, architecture second, and operational clarity everywhere.
+
+---
+
+## Why this project feels production-ready
+
+<div align="center">
+
+<a href="#feature-grid"><img src="https://img.shields.io/badge/AI_ux-Conversation-driven-00C2FF" /></a>
+<a href="#feature-grid"><img src="https://img.shields.io/badge/State-Session_+_basket-7C3AED" /></a>
+<a href="#feature-grid"><img src="https://img.shields.io/badge/Retrieval-Product_ranked-22C55E" /></a>
+<a href="#feature-grid"><img src="https://img.shields.io/badge/Platform-LLM_ready-F59E0B" /></a>
+
+</div>
 
 ### Core product experience
-- multi-turn shopping conversations with intent-based responses
-- smart product search and recommendation flow
-- basket tracking with quantity updates and totals
-- checkout ready for a server-side payment flow
-- graceful fallback mode when external services are not configured
+- multi-turn grocery assistance with intent-aware responses
+- basket updates, quantity adjustments, and checkout flow cues
+- personalized UX based on user profile and preference memory
+- graceful fallback behavior when external services are unavailable
 
 ### AI and platform patterns
-- layered orchestration for search, safety, basket updates, and session state
-- front-end + backend separation for future LLM integration
-- telemetry hooks for understanding interaction quality and latency
-- retrieval and ranking abstraction for semantic or vector-based upgrades
-- durable session/storage abstractions for real backend persistence
+- orchestration logic for safety, retrieval, and product decisions
+- front-end and backend separation for future model integration
+- telemetry and event hooks for observability and quality tracking
+- modular store and retrieval layers for future Qdrant, pgvector, or Postgres upgrades
+- backend scaffolding for durable session storage and customer product flows
 
 ### Engineering quality
-- Vercel-ready build setup
-- TypeScript + Vite frontend
-- Python FastAPI backend scaffold for orchestration and future model integration
-- environment-based configuration for local and hosted deployments
-- readable code structure designed for human review and product storytelling
+- Vercel-safe frontend build configuration
+- TypeScript + React storefront with readable app structure
+- Python backend skeleton for orchestration, persistence, and future LLM calls
+- environment-driven config for local and hosted deployments
+- architecture designed to be human-readable and easy to explain in interviews
 
 ---
 
-## What is in the project right now
+## What is in the project
 
-### Frontend
-- React + TypeScript storefront experience
-- shopping chat panel and basket panel
-- cart state updates and total calculations
-- downloadable CSV export for observability and demo data inspection
+<div id="feature-grid">
 
-### AI agent layer
-- intent understanding for shopping requests
-- basket actions, product selection, follow-up questions, and safety checks
-- contextual state for last result sets and pending choices
+### Product experience
+- conversational grocery assistant UI
+- live shopping basket and subtotal logic
+- search and recommendation flow for product discovery
+- checkout-ready workflow for server-side payment execution
 
-### Persistence and services
-- Supabase-ready integration for products, baskets, and event logs
-- optional runtime fallback so the app still works without external keys
-- Vercel serverless Stripe checkout endpoint
-- backend scaffolding for future LLM orchestration and retrieval services
+### AI system architecture
+- intention detection and multi-turn shopping logic
+- guardrail-minded orchestration for safer flows
+- retrieval and ranking abstractions for future production upgrades
+- state awareness for cart, profile, and session memory
 
-### Deployment and ops
-- Vercel deployment config
-- Azure deployment workflow examples for managed backend deployment
-- Docker compose and backend runtime config for local platform experimentation
-- docs for production architecture and deployment guidance
+### Persistence and ops
+- Supabase-ready schema and integration layer
+- local fallback mode to keep the app working without third-party services
+- Vercel serverless Stripe checkout route
+- Docker-based local platform scaffolding and Azure deployment examples
 
----
+### Production story
+- deployment config for Vercel and Azure-style app hosting
+- metrics, monitoring, and evaluation hooks
+- quality checks for build and backend correctness
+- a foundation for real LLM, Postgres, and vector workflows
 
-## Try the interaction patterns
-
-These are the kinds of shopping moments the app is designed to handle:
-
-- “Show me vegan snacks under $5”
-- “Add two avocados to my basket”
-- “What is in my basket?”
-- “Find dairy-free options for lunch”
-- “I want something for breakfast”
-- “Remove the bread from my cart”
-- “Check out”
-
-If the app is running locally, these prompts are a good quick sanity check for stateful basket behavior and product search quality.
+</div>
 
 ---
 
-## Architecture snapshot
+## Platform architecture
 
 ```mermaid
 flowchart LR
   A[Customer] --> B[React frontend]
   B --> C[Session + basket state]
-  C --> D[Agent logic]
-  D --> E[Product retrieval]
-  D --> F[Safety checks]
+  C --> D[Agent or orchestration layer]
+  D --> E[Product retrieval + ranking]
+  D --> F[Safety + policy checks]
   D --> G[Checkout + telemetry]
   E --> H[Supabase / local fallback]
   G --> I[Stripe + Vercel serverless]
-  D --> J[Future model orchestration]
+  D --> J[Future LLM + vector backend]
 ```
 
-The system is intentionally modular so that a future LLM backend can slot into the same behavior without rewriting the customer experience.
+This architecture is intentionally modular. It shows how a demo-first shopping assistant can evolve into a serious AI commerce product without rewriting the user experience from scratch.
+
+---
+
+## Try the interaction patterns
+
+These are the kinds of prompts the app is designed to handle in a real shopping flow:
+
+- “Show me vegan snacks under $5”
+- “Add two avocados to my basket”
+- “What is in my basket?”
+- “Find dairy-free breakfast ideas”
+- “Remove the bread from my cart”
+- “I want a lighter lunch option”
+- “Check out”
+
+If the app is running locally, these prompts are a great sanity check for basket continuity, relevance filtering, and conversation state handling.
+
+---
+
+## Run it locally
+
+### 1) Frontend
+
+```bash
+npm install
+npm run dev
+```
+
+Then open the app in the browser and start shopping.
+
+### 2) Production-safe deployment
+
+This repo is set up for Vercel-style deployment and includes a serverless Stripe checkout route.
+
+```bash
+npm install
+npm run build
+```
+
+Set the following environment variables in the deployment dashboard:
+
+```bash
+VITE_SUPABASE_URL=your_supabase_url
+VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+VITE_STRIPE_PUBLISHABLE_KEY=your_public_key
+VITE_STRIPE_CHECKOUT_URL=/api/create-checkout-session
+STRIPE_SECRET_KEY=your_secret_key
+SITE_URL=https://shopi-assistant.vercel.app
+```
+
+### 3) Backend scaffold
+
+```bash
+cd backend
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+uvicorn app:app --reload --port 8000
+```
+
+The backend layer is intentionally structured for future real LLM orchestration, retrieval, vector search, durable sessions, and monitoring workflows.
+
+---
+
+## Deployment and platform story
+
+This project already includes the building blocks for a credible AI product story:
+
+- Vercel-hosted frontend delivery
+- serverless Stripe checkout
+- Supabase-ready persistence layer
+- backend orchestration scaffold
+- durable storage abstractions
+- retrieval and ranking design
+- telemetry and evaluation hooks
+- Azure deployment examples and platform documentation
+
+That makes the repo better than a simple demo: it reads like a real platform design narrative that can be explained to a hiring manager, product lead, or engineering team.
+
+See [docs/production-deployment.md](docs/production-deployment.md) for the operational guide.
+
+---
+
+## Quality and validation
+
+Use the same checks a team would run before shipping a customer-facing feature:
+
+```bash
+npm test
+npm run build
+python -m compileall backend
+```
+
+This validates the conversational logic, frontend build health, and backend scaffold without hiding complexity behind a vague “it works on my machine” story.
+
+---
+
+## Roadmap
+
+### Already in place
+- [x] conversational grocery shopping agent
+- [x] cart and basket flow
+- [x] Vercel-safe deployment setup
+- [x] Stripe checkout integration path
+- [x] Supabase-ready persistence schema
+- [x] deployment and platform docs
+
+### Next production upgrades
+- [ ] live LLM orchestration with LangGraph or PydanticAI
+- [ ] real vector retrieval with Qdrant or pgvector
+- [ ] durable Postgres session storage
+- [ ] production analytics and monitoring dashboard
+- [ ] auth and per-user cart persistence
+- [ ] advanced ranking and personalization
+- [ ] production-grade evaluation and safety loops
+
+---
+
+## Why this project stands out
+
+Shopi is a strong portfolio project because it does not pretend to be a finished production product while still showing a credible path to one. It communicates:
+
+- product thinking and customer journey design
+- AI system architecture and orchestration patterns
+- retrieval, monitoring, and evaluation foundations
+- real-world deployment awareness
+- readable engineering that is easy to explain and extend
+
+That combination makes it a strong example of applied AI engineering, product intuition, and platform-level thinking.
 
 ---
 
@@ -154,6 +292,7 @@ The system is intentionally modular so that a future LLM backend can slot into t
 ├── docs/
 │   ├── architecture.md
 │   ├── production-deployment.md
+│   ├── shopi-demo.gif
 │   └── shopi-hero.svg
 ├── .github/workflows/
 │   └── deploy.yml
@@ -166,119 +305,6 @@ The system is intentionally modular so that a future LLM backend can slot into t
 
 ---
 
-## Run it locally
-
-### 1) Frontend
-
-```bash
-npm install
-npm run dev
-```
-
-Then open the app in the browser and start shopping.
-
-### 2) Production-safe Vercel deployment
-
-This repo includes a Vercel deployment configuration and a serverless Stripe checkout route.
-
-```bash
-npm install
-npm run build
-```
-
-Deploy to Vercel with the repo root as the project root. Make sure the environment variables are set in the Vercel dashboard:
-
-```bash
-VITE_SUPABASE_URL=your_supabase_url
-VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
-VITE_STRIPE_PUBLISHABLE_KEY=your_public_key
-VITE_STRIPE_CHECKOUT_URL=/api/create-checkout-session
-STRIPE_SECRET_KEY=your_secret_key
-SITE_URL=https://shopi-assistant.vercel.app
-```
-
-### 3) Backend scaffold
-
-```bash
-cd backend
-python -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-uvicorn app:app --reload --port 8000
-```
-
-The backend layer is designed for future real LLM orchestration, durable memory, retrieval, and telemetry, while still working in a readable, understandable way.
-
----
-
-## Production deployment and platform story
-
-This project already includes the building blocks for a serious platform story:
-
-- Vercel-hosted frontend
-- serverless Stripe checkout
-- Supabase-ready persistence layer
-- backend orchestration scaffold
-- storage and retrieval abstraction
-- evaluation and telemetry hooks
-- deployment docs and CI workflow
-
-That means the project is not just a toy app — it is structured as a realistic foundation for a production AI commerce platform.
-
-See [docs/production-deployment.md](docs/production-deployment.md) for the full operational guide.
-
----
-
-## Quality and validation
-
-Use the same checks a real product team would run before shipping:
-
-```bash
-npm test
-npm run build
-python -m compileall backend
-```
-
-This validates the conversational logic, build health, and backend scaffolding while keeping the architecture transparent and maintainable.
-
----
-
-## Roadmap
-
-### Already in place
-- [x] conversational shopping agent
-- [x] product search and basket flow
-- [x] Vercel-safe deployment setup
-- [x] Stripe-ready serverless checkout
-- [x] Supabase schema and persistence route
-- [x] deployment docs and architecture notes
-
-### Next production upgrades
-- [ ] live LLM orchestration with LangGraph or PydanticAI
-- [ ] real vector retrieval with Qdrant or pgvector
-- [ ] durable Postgres session storage
-- [ ] production analytics and monitoring dashboard
-- [ ] auth and per-user cart persistence
-- [ ] advanced ranking and personalization
-- [ ] production-grade evaluation and safety loops
-
----
-
-## Why this project stands out
-
-Shopi is a strong example of a product-centered AI system because it is not hiding complexity. It shows the trade-offs, modular boundaries, and growth path that a real customer-facing AI product needs.
-
-It reflects the kind of engineering story teams actually care about:
-
-- from prototype to platform thinking
-- from chat UX to product architecture
-- from demo features to operational readiness
-- from isolated AI logic to a fuller product system
-
-That is what makes the project compelling for portfolio, product storytelling, and technical discussions.
-
----
-
 ## Project note
 
-This repo is intentionally readable and production-minded. It is built to communicate both product value and engineering depth, which makes it a good fit for portfolio presentation, technical reviews, and AI product architecture conversations.
+This repo is intentionally readable and production-minded. It is built to communicate both product value and engineering depth, making it a strong fit for portfolio presentation, technical reviews, and AI product architecture conversations.
