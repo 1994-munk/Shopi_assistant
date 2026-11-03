@@ -1,0 +1,111 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="440" viewBox="0 0 720 440" role="img" aria-label="Animated demo: a shopper asks Shopi for vegan snacks, sees product cards, adds one to the basket, and the total updates">
+  <style>
+    .frame { fill: #ffffff; stroke: #d6dde5; stroke-width: 1; }
+    .bar { fill: #f1f5f8; }
+    .brand { fill: #0f766e; }
+    .brand-txt { font: 600 18px system-ui, -apple-system, Segoe UI, sans-serif; fill: #ffffff; }
+    .title { font: 600 15px system-ui, -apple-system, Segoe UI, sans-serif; fill: #0f172a; }
+    .sub { font: 12px system-ui, -apple-system, Segoe UI, sans-serif; fill: #475569; }
+    .user { fill: #0f766e; }
+    .bot { fill: #eef2f6; }
+    .txt-light { font: 14px system-ui, -apple-system, Segoe UI, sans-serif; fill: #ffffff; }
+    .txt-dark { font: 14px system-ui, -apple-system, Segoe UI, sans-serif; fill: #0f172a; }
+    .card { fill: #ffffff; stroke: #d6dde5; }
+    .card-name { font: 600 13px system-ui, -apple-system, Segoe UI, sans-serif; fill: #0f172a; }
+    .card-price { font: 13px system-ui, -apple-system, Segoe UI, sans-serif; fill: #0f766e; }
+    .basket-bg { fill: #ecfdf5; stroke: #a7f3d0; }
+    .basket-txt { font: 600 14px system-ui, -apple-system, Segoe UI, sans-serif; fill: #065f46; }
+    .step { opacity: 0; animation-duration: 12s; animation-timing-function: ease-out; animation-iteration-count: infinite; animation-fill-mode: both; }
+    .s1 { animation-name: show-1; }
+    .s2 { animation-name: show-2; }
+    .s3 { animation-name: show-3; }
+    .s4 { animation-name: show-4; }
+    .s5 { animation-name: show-5; }
+    .s6 { animation-name: show-6; }
+    @keyframes show-1 {
+      0% { opacity: 0; transform: translateY(8px); }
+      4% { opacity: 1; transform: translateY(0); }
+      88% { opacity: 1; transform: translateY(0); }
+      92%, 100% { opacity: 0; transform: translateY(0); }
+    }
+    @keyframes show-2 {
+      0%, 11% { opacity: 0; transform: translateY(8px); }
+      16% { opacity: 1; transform: translateY(0); }
+      88% { opacity: 1; transform: translateY(0); }
+      92%, 100% { opacity: 0; transform: translateY(0); }
+    }
+    @keyframes show-3 {
+      0%, 21% { opacity: 0; transform: translateY(8px); }
+      26% { opacity: 1; transform: translateY(0); }
+      88% { opacity: 1; transform: translateY(0); }
+      92%, 100% { opacity: 0; transform: translateY(0); }
+    }
+    @keyframes show-4 {
+      0%, 36% { opacity: 0; transform: translateY(8px); }
+      41% { opacity: 1; transform: translateY(0); }
+      88% { opacity: 1; transform: translateY(0); }
+      92%, 100% { opacity: 0; transform: translateY(0); }
+    }
+    @keyframes show-5 {
+      0%, 46% { opacity: 0; transform: translateY(8px); }
+      51% { opacity: 1; transform: translateY(0); }
+      88% { opacity: 1; transform: translateY(0); }
+      92%, 100% { opacity: 0; transform: translateY(0); }
+    }
+    @keyframes show-6 {
+      0%, 60% { opacity: 0; transform: translateY(8px); }
+      65% { opacity: 1; transform: translateY(0); }
+      88% { opacity: 1; transform: translateY(0); }
+      92%, 100% { opacity: 0; transform: translateY(0); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .step { animation: none; opacity: 1; }
+    }
+  </style>
+
+  <rect class="frame" x="0.5" y="0.5" width="719" height="439" rx="14"/>
+  <rect class="bar" x="0.5" y="0.5" width="719" height="60" rx="14"/>
+  <rect class="bar" x="0.5" y="40" width="719" height="20"/>
+  <rect class="brand" x="24" y="13" width="36" height="36" rx="9"/>
+  <text x="42" y="37" text-anchor="middle" class="brand-txt">S</text>
+  <text x="72" y="30" class="title">Shopi</text>
+  <text x="72" y="47" class="sub">Agentic shopping assistant</text>
+
+  <g class="step s1">
+    <rect class="user" x="420" y="82" width="276" height="36" rx="18"/>
+    <text x="558" y="105" text-anchor="middle" class="txt-light">Show vegan snacks under $5</text>
+  </g>
+
+  <g class="step s2">
+    <rect class="bot" x="24" y="132" width="310" height="36" rx="18"/>
+    <text x="40" y="155" class="txt-dark">Here are 3 vegan snacks under $5.</text>
+  </g>
+
+  <g class="step s3">
+    <rect class="card" x="24" y="182" width="200" height="78" rx="12"/>
+    <text x="40" y="210" class="card-name">Roasted Chickpeas</text>
+    <text x="40" y="234" class="card-price">$3.49</text>
+    <rect class="card" x="236" y="182" width="200" height="78" rx="12"/>
+    <text x="252" y="210" class="card-name">Apple Chips</text>
+    <text x="252" y="234" class="card-price">$2.99</text>
+    <rect class="card" x="448" y="182" width="200" height="78" rx="12"/>
+    <text x="464" y="210" class="card-name">Kale Crisps</text>
+    <text x="464" y="234" class="card-price">$4.25</text>
+  </g>
+
+  <g class="step s4">
+    <rect class="user" x="420" y="282" width="276" height="36" rx="18"/>
+    <text x="558" y="305" text-anchor="middle" class="txt-light">Add the first one</text>
+  </g>
+
+  <g class="step s5">
+    <rect class="bot" x="24" y="332" width="420" height="36" rx="18"/>
+    <text x="40" y="355" class="txt-dark">Added Roasted Chickpeas to your basket.</text>
+  </g>
+
+  <g class="step s6">
+    <rect class="basket-bg" x="24" y="384" width="672" height="38" rx="12"/>
+    <text x="40" y="408" class="basket-txt">Basket total: $3.49</text>
+    <text x="680" y="408" text-anchor="end" class="basket-txt">1 item</text>
+  </g>
+</svg>
