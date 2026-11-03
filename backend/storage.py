@@ -28,6 +28,12 @@ class SQLiteSessionStore:
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
         self._initialize_database()
 
+    def migrate_schema(self) -> Dict[str, Any]:
+        """Ensure the SQLite schema exists; this is a no-op for an already initialized store."""
+
+        self._initialize_database()
+        return {"status": "ok", "database": "sqlite"}
+
     def _connect(self) -> sqlite3.Connection:
         connection = sqlite3.connect(self.db_path)
         connection.row_factory = sqlite3.Row
@@ -156,6 +162,30 @@ class SQLiteSessionStore:
 
         return [dict(row) for row in rows]
 
+    def list_recent_sessions(self, limit: int = 10) -> List[Dict[str, Any]]:
+        """Return recent session summaries for dashboards and review screens."""
+
+        with self._connect() as connection:
+            rows = connection.execute(
+                """
+                SELECT session_id, basket_json, metadata_json, updated_at
+                FROM sessions
+                ORDER BY updated_at DESC
+                LIMIT ?
+                """,
+                (limit,),
+            ).fetchall()
+
+        return [
+            {
+                "session_id": row["session_id"],
+                "basket": json.loads(row["basket_json"]),
+                "metadata": json.loads(row["metadata_json"]),
+                "updated_at": row["updated_at"],
+            }
+            for row in rows
+        ]
+
 
 class PostgresSessionStore:
     """Postgres-backed session store intended for production deployments."""
@@ -211,6 +241,18 @@ class PostgresSessionStore:
                     """
                 )
                 connection.commit()
+
+    def migrate_schema(self) -> Dict[str, Any]:
+        """Create the Postgres tables if the database URL is configured."""
+
+        dsn = os.getenv("DATABASE_URL")
+        if not dsn:
+            self._initialize_database()
+            return {"status": "ok", "database": "sqlite", "tables": ["sessions", "messages", "turns"]}
+
+        from postgres_migration import ensure_postgres_schema
+
+        return ensure_postgres_schema(dsn)
 
     def save_session(self, session_id: str, basket: List[Dict[str, Any]], metadata: Dict[str, Any]) -> None:
         with self._connect() as connection:
@@ -298,6 +340,32 @@ class PostgresSessionStore:
                 "safety_flags": row[3],
                 "latency_ms": row[4],
                 "created_at": row[5],
+            }
+            for row in rows
+        ]
+
+    def list_recent_sessions(self, limit: int = 10) -> List[Dict[str, Any]]:
+        """Return recent session summaries for dashboards and review screens."""
+
+        with self._connect() as connection:
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    """
+                    SELECT session_id, basket_json, metadata_json, updated_at
+                    FROM sessions
+                    ORDER BY updated_at DESC
+                    LIMIT %s
+                    """,
+                    (limit,),
+                )
+                rows = cursor.fetchall()
+
+        return [
+            {
+                "session_id": row[0],
+                "basket": json.loads(row[1]),
+                "metadata": json.loads(row[2]),
+                "updated_at": row[3],
             }
             for row in rows
         ]

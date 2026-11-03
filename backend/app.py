@@ -152,6 +152,7 @@ class ChatResponse(BaseModel):
 
 telemetry = TelemetryLogger()
 session_store = SessionStore(db_path="shopi.db")
+db_status = session_store.migrate_schema()
 retriever = CatalogRetriever(CATALOG)
 vector_store = VectorStoreAdapter(CATALOG)
 orchestrator = ShoppingOrchestrator(
@@ -192,11 +193,18 @@ def metrics() -> Dict[str, Any]:
 def dashboard() -> Dict[str, Any]:
     """Return a minimal dashboard payload for a monitoring or internal admin view."""
 
+    try:
+        recent_sessions = session_store.list_recent_sessions(limit=10)
+    except Exception:
+        recent_sessions = []
+
     return {
         "service": "shopi-backend",
+        "database": db_status,
         "vector": vector_store.status(),
         "metrics": telemetry.summarize(),
         "graph": build_langgraph_graph(),
+        "recent_sessions": recent_sessions,
     }
 
 
