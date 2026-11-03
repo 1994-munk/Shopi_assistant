@@ -119,6 +119,10 @@ See [docs/architecture.md](docs/architecture.md) for the full platform blueprint
 
 ## Running the platform
 
+### Production deployment
+
+See [docs/production-deployment.md](docs/production-deployment.md) for the deployment checklist, environment variables, and container strategy.
+
 ### Frontend demo
 
 ```bash
