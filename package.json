@@ -1,8 +1,17 @@
 {
   "name": "shopi",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.0.1",
   "type": "module",
+  "description": "Shopi is a vibrant, AI-powered grocery assistant with conversational search, smart basket management, and a secure demo checkout flow.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/1994-munk/Shopi_assistant.git"
+  },
+  "homepage": "https://github.com/1994-munk/Shopi_assistant#readme",
+  "bugs": {
+    "url": "https://github.com/1994-munk/Shopi_assistant/issues"
+  },
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
@@ -10,6 +19,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@stripe/stripe-js": "^10.2.1",
     "@supabase/supabase-js": "^2.45.4",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"

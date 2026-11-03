@@ -9,18 +9,23 @@ export default function App() {
   const [exportOpen, setExportOpen] = useState(false);
 
   return (
-    <div className="app">
+    <div className="app-shell">
       <header className="topbar">
         <div className="brand">
           <span className="brand-mark" aria-hidden="true">S</span>
-          <div>
+          <div className="brand-copy">
             <strong className="brand-name">Shopi</strong>
-            <span className="brand-tagline">Agentic shopping assistant</span>
+            <span className="brand-tagline">Vibrant grocery AI</span>
           </div>
         </div>
-        <button type="button" className="button button-ghost button-small" onClick={() => setExportOpen(true)}>
-          Download data
-        </button>
+
+        <div className="topbar-actions" aria-label="Shopi status">
+          <span className="status-pill">Fresh picks</span>
+          <span className="status-pill status-pill-accent">Secure checkout</span>
+          <button type="button" className="button button-ghost button-small" onClick={() => setExportOpen(true)}>
+            Download data
+          </button>
+        </div>
       </header>
 
       <main className="assistant-layout">

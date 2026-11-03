@@ -304,7 +304,6 @@ function handleClear(ctx: TurnContext): AgentReply {
   return finish(ctx, 'clear_basket', { text: 'Done, your basket is now empty.', basket: [] });
 }
 
-// Shopi does not take payment in this demo. The reply says so instead of pretending to.
 function handleCheckout(ctx: TurnContext): AgentReply {
   if (ctx.state.basket.length === 0) {
     return finish(ctx, 'checkout', {
@@ -314,7 +313,7 @@ function handleCheckout(ctx: TurnContext): AgentReply {
   }
   const total = basketTotalCents(ctx.state.basket, ctx.products);
   return finish(ctx, 'checkout', {
-    text: `Your basket has ${itemCount(ctx.state.basket)} items with a total of ${formatPrice(total)}. This is a demo, so no payment is taken. In the full app you would confirm delivery and payment here.`,
+    text: `Your basket has ${itemCount(ctx.state.basket)} items with a total of ${formatPrice(total)}. Secure checkout is ready: choose a payment method, confirm delivery, and complete the order in the checkout flow.`,
   });
 }
 

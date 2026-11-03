@@ -131,6 +131,24 @@ FROM (VALUES
   ('Frozen Mixed Berries 600g', 'frozen', 469, 'Blueberries, raspberries and blackberries, flash frozen.', ARRAY['vegan','gluten-free']),
   ('Veggie Burgers (4 pack)', 'frozen', 599, 'Pea and bean patties that cook in ten minutes.', ARRAY['vegetarian']),
   ('Dark Chocolate 70% 180g', 'snacks', 329, 'Intense dark chocolate with low sugar.', ARRAY['vegan','gluten-free','low-sugar']),
-  ('Mixed Nuts 300g', 'snacks', 499, 'Roasted almonds, cashews and walnuts.', ARRAY['vegan','gluten-free'])
+  ('Mixed Nuts 300g', 'snacks', 499, 'Roasted almonds, cashews and walnuts.', ARRAY['vegan','gluten-free']),
+  ('Coconut Water 500ml', 'drinks', 279, 'Hydrating coconut water with a fresh tropical finish.', ARRAY['vegan','gluten-free','low-sugar']),
+  ('Fresh Mangoes (2 pack)', 'produce', 349, 'Sweet golden mangoes perfect for fruit bowls and smoothies.', ARRAY['vegan','gluten-free']),
+  ('Cucumber & Herb Salad Kit', 'produce', 429, 'Ready-to-eat salad greens and crunchy veg for quick lunches.', ARRAY['vegan','gluten-free']),
+  ('Berry Yogurt Cups 4 pack', 'dairy', 419, 'Creamy yogurt with berries and a touch of honey.', ARRAY['vegetarian','gluten-free']),
+  ('Cinnamon Granola 500g', 'bakery', 449, 'Toasted oat granola with cinnamon and dried fruit.', ARRAY['vegan']),
+  ('Organic Lentils 500g', 'pantry', 329, 'Quick-cooking red lentils for soups and curries.', ARRAY['vegan','gluten-free']),
+  ('Hummus Dip 200g', 'snacks', 299, 'Smooth chickpea dip with lemon and garlic.', ARRAY['vegan','gluten-free']),
+  ('Frozen Veggie Stir-Fry Mix', 'frozen', 489, 'A colorful mix of peppers, broccoli and snap peas.', ARRAY['vegan','gluten-free']),
+  ('Citrus Infused Sparkling Water', 'drinks', 189, 'Fresh orange and lemon notes with zero added sugar.', ARRAY['vegan','gluten-free','low-sugar']),
+  ('Protein Breakfast Bars 6 pack', 'snacks', 399, 'Crunchy oat bars with almond butter and fruit.', ARRAY['vegan']),
+  ('Mini Bell Peppers (6 pack)', 'produce', 329, 'Sweet crunchy peppers for salads, roasting and snacking.', ARRAY['vegan','gluten-free']),
+  ('Frozen Spinach 300g', 'frozen', 219, 'Quick-thaw spinach for curries, smoothies and omelettes.', ARRAY['vegan','gluten-free']),
+  ('Roasted Pumpkin Seeds 150g', 'snacks', 269, 'Crunchy seeds with a smoky finish and plenty of protein.', ARRAY['vegan','gluten-free']),
+  ('Coconut Yogurt Pots 4 pack', 'dairy', 459, 'Creamy coconut yogurt with a light vanilla finish.', ARRAY['vegan','dairy-free']),
+  ('Crunchy Veggie Sticks 250g', 'produce', 289, 'Fresh carrot, cucumber and celery sticks for snacking.', ARRAY['vegan','gluten-free']),
+  ('Honey & Oat Granola 500g', 'bakery', 479, 'Crisp granola with sweet honey and rolled oats.', ARRAY['vegetarian']),
+  ('Zero Sugar Lemonade 750ml', 'drinks', 239, 'Bright lemon soda with zero sugar and a crisp finish.', ARRAY['vegan','gluten-free','low-sugar']),
+  ('Vegan Brownie Bites 200g', 'snacks', 349, 'Rich chocolate brownies made without dairy.', ARRAY['vegan'])
 ) AS v(name, category, price_cents, description, tags)
 WHERE NOT EXISTS (SELECT 1 FROM products p WHERE p.name = v.name);

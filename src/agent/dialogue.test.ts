@@ -80,11 +80,11 @@ describe('shopping missions', () => {
     expect(replies[1].nextState.basket).toEqual([]);
   });
 
-  it('reports checkout totals without taking payment', () => {
+  it('reports checkout totals and calls out the secure checkout flow', () => {
     const replies = run(['add oat milk', 'checkout']);
     expect(replies[1].intent).toBe('checkout');
     expect(replies[1].text).toContain('$2.89');
-    expect(replies[1].text).toContain('no payment is taken');
+    expect(replies[1].text).toContain('Secure checkout is ready');
   });
 
   it('refers back to the first search result with "add it"', () => {
