@@ -119,6 +119,8 @@ See [docs/architecture.md](docs/architecture.md) for the full platform blueprint
 
 ## Running the platform
 
+### Frontend demo
+
 ```bash
 npm install
 npm run dev
@@ -130,6 +132,18 @@ Then open the app in your browser and try prompts such as:
 - "Add two avocados"
 - "What is in my basket?"
 - "Checkout"
+
+### LLM-ready backend scaffold
+
+```bash
+cd backend
+python -m venv .venv
+. .venv\Scripts\activate
+pip install -r requirements.txt
+uvicorn app:app --reload --port 8000
+```
+
+This backend is intentionally designed to be easy to read and extend. It exposes a simple FastAPI API, determines shopping intent, applies safety checks, and demonstrates the orchestration layer that a larger LLM platform would later replace with a model-backed agent flow.
 
 ---
 
