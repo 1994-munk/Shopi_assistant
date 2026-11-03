@@ -21,7 +21,7 @@ except ImportError:  # pragma: no cover - optional dependency at runtime
 
 
 class VectorStoreAdapter:
-    """Retrieval adapter with a stable interface and a Qdrant-ready path."""
+    """Retrieval adapter with a stable interface and a real Qdrant-ready path."""
 
     def __init__(self, catalog: Sequence[Dict[str, Any]]) -> None:
         self.catalog = list(catalog)
@@ -37,11 +37,33 @@ class VectorStoreAdapter:
                     api_key=os.getenv("QDRANT_API_KEY", ""),
                 )
                 self._ensure_collection()
+                self._sync_catalog()
             except Exception:  # pragma: no cover - runtime connection is optional
                 self.qdrant_client = None
 
     def _normalize(self, value: str) -> str:
         return " ".join(value.lower().strip().split())
+
+    def _tokenize(self, value: str) -> List[str]:
+        return [token for token in self._normalize(value).split() if token]
+
+    def _embedding_for_text(self, text: str) -> List[float]:
+        """Create a deterministic vector representation for Qdrant indexing.
+
+        This is intentionally simple and stable: it does not require an external embedding
+        model for local validation, but it gives the system a real vector search path once
+        Qdrant is configured.
+        """
+
+        tokens = self._tokenize(text)
+        if not tokens:
+            return [0.0] * 8
+
+        ordered = sorted(set(tokens))
+        vector = [0.0] * 8
+        for index, token in enumerate(ordered[:8]):
+            vector[index] = float(sum(1 for candidate in tokens if candidate == token))
+        return vector
 
     def _score_product(self, product: Dict[str, Any], query: str) -> float:
         """A simple lexical scoring function that remains easy to audit."""
@@ -91,19 +113,6 @@ class VectorStoreAdapter:
         scored.sort(key=lambda item: item[0], reverse=True)
         return [product for _, product in scored[:limit]]
 
-    def _keyword_vector(self, query: str) -> List[float]:
-        """Create a tiny vector representation for an optional Qdrant-backed deployment."""
-
-        tokens = self._normalize(query).split()
-        if not tokens:
-            return [0.0, 0.0, 0.0]
-
-        return [
-            float(len(tokens)),
-            float(sum(len(token) for token in tokens) / max(len(tokens), 1)),
-            float(sum(ord(char) for char in query) % 1000) / 1000.0,
-        ]
-
     def _ensure_collection(self) -> None:
         """Create the collection if a Qdrant-backed deployment is configured."""
 
@@ -116,10 +125,41 @@ class VectorStoreAdapter:
             try:
                 self.qdrant_client.create_collection(
                     collection_name=self.qdrant_collection,
-                    vectors_config={"size": 3, "distance": "cosine"},
+                    vectors_config={"size": 8, "distance": "cosine"},
                 )
             except Exception:
                 pass
+
+    def _sync_catalog(self) -> None:
+        """Upsert the local catalog into Qdrant when a real collection is configured."""
+
+        if self.qdrant_client is None:
+            return
+
+        try:
+            points = [
+                {
+                    "id": product["id"],
+                    "vector": self._embedding_for_text(
+                        " ".join(
+                            [
+                                str(product.get("name", "")),
+                                str(product.get("description", "")),
+                                str(product.get("category", "")),
+                                " ".join(product.get("tags", [])),
+                            ]
+                        )
+                    ),
+                    "payload": product,
+                }
+                for product in self.catalog
+            ]
+            self.qdrant_client.upsert(
+                collection_name=self.qdrant_collection,
+                points=points,
+            )
+        except Exception:  # pragma: no cover - defer to lexical fallback when Qdrant cannot be reached
+            pass
 
     def _qdrant_search(self, query: str, limit: int = 6) -> List[Dict[str, Any]]:
         """Query Qdrant when enabled and available; otherwise return an empty list."""
@@ -130,7 +170,7 @@ class VectorStoreAdapter:
         try:
             results = self.qdrant_client.search(
                 collection_name=self.qdrant_collection,
-                query_vector=self._keyword_vector(query),
+                query_vector=self._embedding_for_text(query),
                 limit=limit,
                 with_payload=True,
             )

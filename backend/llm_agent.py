@@ -12,13 +12,15 @@ forcing the rest of the codebase to know the details.
 
 from __future__ import annotations
 
+import os
 from typing import Any, Dict, List, Optional
 
 from config import SETTINGS
 
 try:
-    from openai import OpenAI
+    from openai import AzureOpenAI, OpenAI
 except ImportError:  # pragma: no cover - optional dependency at runtime
+    AzureOpenAI = None  # type: ignore[assignment]
     OpenAI = None  # type: ignore[assignment]
 
 
@@ -31,7 +33,26 @@ class LLMShoppingAgent:
     def available(self) -> bool:
         """Return whether a real model is configured and available to use."""
 
-        return bool(self.settings.openai_api_key) and OpenAI is not None
+        if not self.settings.openai_api_key:
+            return False
+
+        provider = (self.settings.llm_provider or "openai").lower()
+        if provider == "azure":
+            return AzureOpenAI is not None and bool(self.settings.openai_api_base)
+        return OpenAI is not None
+
+    def _client(self):
+        """Return the correct OpenAI/Azure client depending on the configured provider."""
+
+        provider = (self.settings.llm_provider or "openai").lower()
+        if provider == "azure":
+            return AzureOpenAI(
+                api_key=self.settings.openai_api_key,
+                azure_endpoint=self.settings.openai_api_base,
+                api_version=os.getenv("AZURE_OPENAI_API_VERSION", "2024-02-01"),
+            )
+
+        return OpenAI(api_key=self.settings.openai_api_key, base_url=self.settings.openai_api_base or None)
 
     def build_prompt(self, user_message: str, matches: List[Dict[str, Any]], basket: List[Dict[str, Any]]) -> str:
         """Create a compact prompt that keeps the context readable and useful."""
@@ -62,7 +83,7 @@ class LLMShoppingAgent:
                 return f"I found {len(matches)} product(s) that match your request."
             return "I can help you search for products, review your basket, or check out."
 
-        client = OpenAI(api_key=self.settings.openai_api_key, base_url=self.settings.openai_api_base or None)
+        client = self._client()
 
         try:
             response = client.responses.create(
