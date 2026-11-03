@@ -14,7 +14,7 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "npx tsc -b && npx vite build",
     "test": "vitest run",
     "preview": "vite preview"
   },
