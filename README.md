@@ -162,9 +162,12 @@ This backend is intentionally designed to be easy to read and extend. It exposes
 ```bash
 npm test
 npm run build
+python -m compileall backend
 ```
 
 This helps validate the conversational logic, guardrails, and frontend build health as the platform evolves from prototype toward production readiness.
+
+A GitHub Actions workflow is included in `.github/workflows/deploy.yml` to run validation on pushes and pull requests before deployment.
 
 ---
 
