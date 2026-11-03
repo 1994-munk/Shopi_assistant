@@ -143,6 +143,12 @@ pip install -r requirements.txt
 uvicorn app:app --reload --port 8000
 ```
 
+Then point the frontend to the backend by setting:
+
+```bash
+VITE_SHOPI_API_URL=http://localhost:8000
+```
+
 This backend is intentionally designed to be easy to read and extend. It exposes a simple FastAPI API, determines shopping intent, applies safety checks, and demonstrates the orchestration layer that a larger LLM platform would later replace with a model-backed agent flow.
 
 ---

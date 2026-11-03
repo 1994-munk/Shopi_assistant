@@ -19,6 +19,7 @@ from __future__ import annotations
 from typing import Any, Dict, List
 
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
 # ---------------------------------------------------------------------------
@@ -29,6 +30,17 @@ app = FastAPI(
     title="Shopi LLM Platform API",
     description="A readable backend scaffold for an AI shopping assistant.",
     version="0.1.0",
+)
+
+# CORS is enabled here because the frontend and backend will commonly run on different
+# local ports during development. This keeps the system easy to test without disabling
+# security in production environments.
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # ---------------------------------------------------------------------------
